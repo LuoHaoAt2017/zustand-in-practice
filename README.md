@@ -1,73 +1,216 @@
-# React + TypeScript + Vite
+# 《Zustand 状态管理：从能用到用好（6 集实战）》
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+非常好，这个选题**非常专业、而且非常“中级前端友好”**。
+Zustand 本身 **RPM 高 + 搜索稳定 + 适合系列化**，你这个 6 集设计，**天然就能做成“免费迷你课”**。
 
-Currently, two official plugins are available:
+下面我给你一套 **“可直接开拍级别”的完整规划**，不是泛大纲，而是 **每一集讲什么、为什么这么排、怎么拍**。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+# 🎯 专题名称（建议）
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**《Zustand 状态管理：从能用到用好（6 集实战）》**
 
-## Expanding the ESLint configuration
+副标题（写在简介里）：
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+> 适合已经会 React 的中级前端，系统掌握 Zustand 的真实使用场景
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 🧱 整体设计原则（先看）
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+* **第 1 集 = 流量入口（搜索友好）**
+* **第 2–4 集 = 中级核心能力**
+* **第 5 集 = 高级差异点**
+* **第 6 集 = 信任 + 变现承接**
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+每一集 **都能单独看**，但连着看体验更好。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+# 📚 6 集完整规划（逐集拆解）
+
+---
+
+## 第 1 集（入口流量）
+
+### 🎬 标题
+
+**《为什么我在中型项目中选择 Zustand？（对比 useState / Context）》**
+
+### 核心目的
+
+* 吸引“正在纠结状态管理方案”的人
+* 解决 **“该不该用 Zustand”**
+
+### 内容结构
+
+1. 真实项目中的痛点
+
+   * props drilling
+   * Context 滥用
+2. Zustand 的设计理念（不讲源码）
+3. Zustand vs Context 的真实差异
+4. 适合 / 不适合的场景总结
+
+⏱ 20–25 分钟
+
+---
+
+## 第 2 集（基础但不入门）
+
+### 🎬 标题
+
+**《Zustand 基础用法 + 常见 5 个坑（新手必踩）》**
+
+### 核心目的
+
+* 让观众“真正敢用”
+* 解决基础焦虑
+
+### 内容结构
+
+1. 创建 store 的正确方式
+2. 拆分 state / action
+3. **5 个常见坑**
+   * 直接修改 state
+   * 过度全局化
+4. 基础最佳实践
+
+⏱ 25–30 分钟
+
+---
+
+## 第 3 集（中级核心）
+
+### 🎬 标题
+
+**《中型项目中，Zustand 的模块化设计实践》**
+
+### 核心目的
+
+* 展示“中级前端的结构能力”
+
+### 内容结构
+
+1. 单 store vs 多 store
+2. 按业务模块拆 store
+3. selector 的正确使用
+4. 项目目录结构示例
+
+⏱ 30–40 分钟
+
+---
+
+## 第 4 集（真实复杂场景）
+
+### 🎬 标题
+
+**《复杂业务场景下的 Zustand：异步、表单、跨模块状态》**
+
+### 核心目的
+
+* 拉开你和“普通教程”的差距
+
+### 内容结构
+
+1. 异步请求模式
+2. loading / error 设计
+3. 表单状态管理
+4. 跨模块状态通信
+
+⏱ 35–45 分钟
+
+---
+
+## 第 5 集（高级差异点）
+
+### 🎬 标题
+
+**《Zustand 性能优化实战：selector、subscribe、避免重渲染》**
+
+### 核心目的
+
+* 高级感
+* 强专业背书
+
+### 内容结构
+
+1. Zustand 的渲染机制
+2. selector 如何减少 render
+3. subscribe 的使用场景
+4. 性能对比 Demo
+
+⏱ 30–40 分钟
+
+---
+
+## 第 6 集（实战收官）
+
+### 🎬 标题
+
+**《实战：我如何用 Zustand 重构一个混乱的 React 项目》**
+
+### 核心目的
+
+* 建立信任
+* 为产品 / 课程铺路
+
+### 内容结构
+
+1. 重构前的问题分析
+2. Zustand 设计决策
+3. 重构过程（重点片段）
+4. 前后对比总结
+
+⏱ 40–60 分钟
+
+---
+
+# 📌 拍摄与发布建议（非常关键）
+
+### ✅ 发布顺序
+
+* **按 1 → 6 顺序**
+* 每周 1–2 集
+
+### ✅ 播放列表
+
+* 建立 Playlist
+* 名字和专题一致
+
+### ✅ 每集固定结构
+
+1. 本集解决什么问题
+2. 内容目录
+3. 实战 / 示例
+4. 总结 + 下一集预告
+
+---
+
+# 💰 变现预埋（不影响观感）
+
+在第 4–6 集，可以自然提一句：
+
+> “这个系列其实是我《中级前端状态管理实战》的一部分，后面会把完整源码和更多案例整理出来。”
+
+📌 不卖课也没问题
+📌 但 **这是信任变现的黄金点**
+
+---
+
+# 🚀 这个专题的“长期价值”
+
+* 可持续被搜索
+* 可作为你**第一个付费产品的基础**
+* 可复用到课程 / 文档 / 社区
+
+---
+
+## 下一步我可以继续帮你做的（任选）
+
+1️⃣ **帮你写第 1 集的完整逐分钟脚本**
+2️⃣ **帮你设计 Zustand 项目的 Demo 业务场景**
+3️⃣ **帮你规划这个专题如何转化为付费产品**
+
+你选一个，我直接继续往下拆。
