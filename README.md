@@ -214,3 +214,6 @@ Zustand 本身 **RPM 高 + 搜索稳定 + 适合系列化**，你这个 6 集设
 3️⃣ **帮你规划这个专题如何转化为付费产品**
 
 你选一个，我直接继续往下拆。
+
+
+CLAUDE_API_KEY='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'
