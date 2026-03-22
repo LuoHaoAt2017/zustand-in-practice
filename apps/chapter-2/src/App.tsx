@@ -2,56 +2,110 @@ import React, { useState, useEffect } from 'react'
 import { create } from 'zustand'
 import './App.css'
 
+// ========== Store 类型定义 ==========
+
+// 基础计数器store
+interface CounterStore {
+  count: number
+  increment: () => void
+  decrement: () => void
+  reset: () => void
+}
+
+// 坑1 store
+interface Pitfall1Store {
+  count: number
+  unrelated: number
+  incrementCount: () => void
+  incrementUnrelated: () => void
+}
+
+// 坑2 store
+interface Pitfall2Store {
+  items: number[]
+  addItem: (item: number) => void
+}
+
+// 坑3 store
+interface Pitfall3Store {
+  data: string | null
+  loading: boolean
+  error?: string | null
+  fetchData: (shouldFail?: boolean) => Promise<void>
+}
+
+// 坑4 store
+interface Pitfall4Store {
+  count: number
+  increment: () => void
+  reset: () => void
+}
+
+// 坑5 store
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+interface Pitfall5Store {
+  user: User | null
+  setUser: (user: User | null) => void
+}
+
+// ========== Store 实现 ==========
+
 // 基础计数器store - 正确示例
-const useCounterStore = create((set) => ({
+const useCounterStore = create<CounterStore>((set) => ({
   count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-  decrement: () => set((state) => ({ count: state.count - 1 })),
+  increment: () => set((state: CounterStore) => ({ count: state.count + 1 })),
+  decrement: () => set((state: CounterStore) => ({ count: state.count - 1 })),
   reset: () => set({ count: 0 }),
 }))
 
-// 坑1：直接在组件中解构导致重渲染的store
-const useBadStore1 = create(() => ({
+// 坑1：直接在组件中解构导致重渲染
+const usePitfall1BadStore = create<Pitfall1Store>((set) => ({
   count: 0,
   unrelated: 0,
-  incrementCount: () => useBadStore1.setState((state) => ({ count: state.count + 1 })),
-  incrementUnrelated: () => useBadStore1.setState((state) => ({ unrelated: state.unrelated + 1 })),
+  incrementCount: () => set((state: Pitfall1Store) => ({ count: state.count + 1 })),
+  incrementUnrelated: () => set((state: Pitfall1Store) => ({ unrelated: state.unrelated + 1 })),
 }))
 
-const useGoodStore1 = create(() => ({
+const usePitfall1GoodStore = create<Pitfall1Store>((set) => ({
   count: 0,
   unrelated: 0,
-  incrementCount: () => useGoodStore1.setState((state) => ({ count: state.count + 1 })),
-  incrementUnrelated: () => useGoodStore1.setState((state) => ({ unrelated: state.unrelated + 1 })),
+  incrementCount: () => set((state: Pitfall1Store) => ({ count: state.count + 1 })),
+  incrementUnrelated: () => set((state: Pitfall1Store) => ({ unrelated: state.unrelated + 1 })),
 }))
 
-// 坑2：直接修改原状态的store
-const useBadStore2 = create((set) => ({
+// 坑2：直接修改原状态
+const usePitfall2BadStore = create<Pitfall2Store>((set) => ({
   items: [1, 2, 3],
   addItem: (item: number) => {
-    set((state) => {
-      state.items.push(item) // 错误：直接修改原状态
+    set((state: Pitfall2Store) => {
+      // @ts-ignore - 故意错误：直接修改原状态
+      state.items.push(item)
       return state
     })
   },
 }))
 
-const useGoodStore2 = create((set) => ({
+const usePitfall2GoodStore = create<Pitfall2Store>((set) => ({
   items: [1, 2, 3],
   addItem: (item: number) => {
-    set((state) => ({
+    set((state: Pitfall2Store) => ({
       items: [...state.items, item], // 正确：返回新对象
     }))
   },
 }))
 
 // 坑3：忘记处理异步错误
-const useBadStore3 = create((set) => ({
-  data: null as string | null,
+const usePitfall3BadStore = create<Omit<Pitfall3Store, 'error'>>((set) => ({
+  data: null,
   loading: false,
   fetchData: async (shouldFail = false) => {
     set({ loading: true })
-    await new Promise(resolve => setTimeout(resolve, 500)) // 模拟延迟
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     if (shouldFail) {
       // 错误：没有处理错误
@@ -63,14 +117,14 @@ const useBadStore3 = create((set) => ({
   },
 }))
 
-const useGoodStore3 = create((set) => ({
-  data: null as string | null,
+const usePitfall3GoodStore = create<Pitfall3Store>((set) => ({
+  data: null,
   loading: false,
-  error: null as string | null,
+  error: null,
   fetchData: async (shouldFail = false) => {
     set({ loading: true, error: null })
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)) // 模拟延迟
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       if (shouldFail) {
         throw new Error('模拟API错误')
@@ -85,10 +139,10 @@ const useGoodStore3 = create((set) => ({
 }))
 
 // 坑4：无限更新循环
-const useBadStore4 = create((set, get) => ({
+const usePitfall4BadStore = create<Pitfall4Store>((set, get) => ({
   count: 0,
   increment: () => {
-    set((state) => {
+    set((state: Pitfall4Store) => {
       if (state.count < 3) { // 限制为3次以避免浏览器卡死
         get().increment() // 错误：递归调用
       }
@@ -98,10 +152,10 @@ const useBadStore4 = create((set, get) => ({
   reset: () => set({ count: 0 }),
 }))
 
-const useGoodStore4 = create((set) => ({
+const usePitfall4GoodStore = create<Pitfall4Store>((set) => ({
   count: 0,
   increment: () => {
-    set((state) => {
+    set((state: Pitfall4Store) => {
       if (state.count < 10) {
         return { count: state.count + 1 }
       }
@@ -112,23 +166,12 @@ const useGoodStore4 = create((set) => ({
 }))
 
 // 坑5：类型定义不完整
-const useBadStore5 = create((set) => ({
-  user: null, // 类型被推断为any或null
-  setUser: (user: any) => set({ user }), // user参数类型为any
+const usePitfall5BadStore = create<any>((set: any) => ({
+  user: null,
+  setUser: (user: any) => set({ user }),
 }))
 
-interface User {
-  id: string
-  name: string
-  email: string
-}
-
-interface GoodStore5 {
-  user: User | null
-  setUser: (user: User | null) => void
-}
-
-const useGoodStore5 = create<GoodStore5>((set) => ({
+const usePitfall5GoodStore = create<Pitfall5Store>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
 }))
