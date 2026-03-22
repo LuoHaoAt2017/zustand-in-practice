@@ -227,14 +227,11 @@ function App() {
       <div className="code-comparison">
         <div className="code-block">
           <h5>store定义</h5>
-          <pre>{`const useCounterStore = create((set) => ({
+          <pre>{`const useCounterStore = create<CounterStore>((set) => ({
   count: 0,
-  increment: () => set((state) => ({
-    count: state.count + 1
-  })),
-  decrement: () => set((state) => ({
-    count: state.count - 1
-  })),
+  increment: () => set((state) => ({ count: state.count + 1 })),
+  decrement: () => set((state) => ({ count: state.count - 1 })),
+  reset: () => set({ count: 0 }),
 }))`}</pre>
         </div>
         <div className="code-block">
@@ -251,8 +248,11 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall1 = () => {
     const BadComponent = () => {
-      setRenderCountBad(prev => prev + 1)
-      const { count, unrelated, incrementCount, incrementUnrelated } = useBadStore1()
+      useEffect(() => {
+        setRenderCountBad(prev => prev + 1)
+      })
+
+      const { count, unrelated, incrementCount, incrementUnrelated } = usePitfall1BadStore()
 
       return (
         <div className="demo-component">
@@ -269,10 +269,13 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      setRenderCountGood(prev => prev + 1)
-      const count = useGoodStore1((state) => state.count)
-      const incrementCount = useGoodStore1((state) => state.incrementCount)
-      const incrementUnrelated = useGoodStore1((state) => state.incrementUnrelated)
+      useEffect(() => {
+        setRenderCountGood(prev => prev + 1)
+      })
+
+      const count = usePitfall1GoodStore((state: Pitfall1Store) => state.count)
+      const incrementCount = usePitfall1GoodStore((state: Pitfall1Store) => state.incrementCount)
+      const incrementUnrelated = usePitfall1GoodStore((state: Pitfall1Store) => state.incrementUnrelated)
 
       return (
         <div className="demo-component">
@@ -327,7 +330,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall2 = () => {
     const BadComponent = () => {
-      const { items, addItem } = useBadStore2()
+      const { items, addItem } = usePitfall2BadStore()
 
       const handleAdd = () => {
         addItem(items.length + 1)
@@ -344,7 +347,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { items, addItem } = useGoodStore2()
+      const { items, addItem } = usePitfall2GoodStore()
 
       const handleAdd = () => {
         addItem(items.length + 1)
@@ -398,7 +401,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall3 = () => {
     const BadComponent = () => {
-      const { data, loading, fetchData } = useBadStore3()
+      const { data, loading, fetchData } = usePitfall3BadStore()
 
       const handleFetch = async (shouldFail: boolean) => {
         try {
@@ -427,7 +430,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { data, loading, error, fetchData } = useGoodStore3()
+      const { data, loading, error, fetchData } = usePitfall3GoodStore()
 
       const handleFetch = async (shouldFail: boolean) => {
         await fetchData(shouldFail)
@@ -496,7 +499,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall4 = () => {
     const BadComponent = () => {
-      const { count, increment, reset } = useBadStore4()
+      const { count, increment, reset } = usePitfall4BadStore()
 
       const handleIncrement = () => {
         try {
@@ -520,7 +523,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { count, increment, reset } = useGoodStore4()
+      const { count, increment, reset } = usePitfall4GoodStore()
 
       const handleIncrement = () => {
         increment()
@@ -582,17 +585,17 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall5 = () => {
     const BadComponent = () => {
-      const { user, setUser } = useBadStore5()
+      const { user, setUser } = usePitfall5BadStore()
 
       const handleSetUser = () => {
         // TypeScript不会报错，但类型不安全
-        setUser({ id: '1', name: 'John' } as any)
+        setUser({ id: '1', name: 'John' })
         addConsoleLog('设置了user，但类型不安全')
       }
 
       const handleSetInvalid = () => {
         // 可以设置任何类型
-        setUser('invalid' as any)
+        setUser('invalid')
         addConsoleLog('设置了无效的user类型')
       }
 
@@ -609,7 +612,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { user, setUser } = useGoodStore5()
+      const { user, setUser } = usePitfall5GoodStore()
 
       const handleSetUser = () => {
         setUser({ id: '1', name: 'John', email: 'john@example.com' })

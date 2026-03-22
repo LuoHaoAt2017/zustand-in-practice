@@ -54,7 +54,11 @@ function App() {
     setDefaultMountApp('/chapter-1')
     start({
       sandbox: {
-        strictStyleIsolation: true, // 开启严格的样式隔离
+        experimentalStyleIsolation: true, // 使用实验性的样式隔离
+      },
+      excludeAssetFilter: (assetUrl: string) => {
+        // 排除 react-refresh 相关的资源
+        return assetUrl.includes('@react-refresh') || assetUrl.includes('@vite/client')
       },
     })
 
