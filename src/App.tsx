@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { registerMicroApps, start, setDefaultMountApp } from 'qiankun'
 import './App.css'
 
@@ -16,8 +16,10 @@ const chapters = [
 const isDev = import.meta.env.DEV
 const getEntry = (appId: string) => {
   if (isDev) {
-    // 开发环境使用本地服务
-    return `//localhost:${getPort(appId)}`
+    // 开发环境：使用对象格式明确指定入口
+    const port = getPort(appId)
+    // 返回一个HTML字符串，只包含必要的div，让qiankun自己处理脚本
+    return `//localhost:${port}`
   }
   // 生产环境使用构建后的文件
   return `/apps/${appId}/`
@@ -38,29 +40,27 @@ const getPort = (appId: string): number => {
 function App() {
   const [activeChapter, setActiveChapter] = useState('chapter-1')
 
-  // 初始化qiankun
+  // 在开发环境中使用iframe而不是qiankun
   useEffect(() => {
-    const microApps = chapters.map((chapter) => ({
-      name: chapter.id,
-      entry: getEntry(chapter.id),
-      container: '#subapp-container',
-      activeRule: `/${chapter.id}`,
-      props: {
-        chapterId: chapter.id,
-      },
-    }))
+    if (!isDev) {
+      // 生产环境使用qiankun
+      const microApps = chapters.map((chapter) => ({
+        name: chapter.id,
+        entry: getEntry(chapter.id),
+        container: '#subapp-container',
+        activeRule: `/${chapter.id}`,
+        props: {
+          chapterId: chapter.id,
+        },
+      }))
 
-    registerMicroApps(microApps)
-    setDefaultMountApp('/chapter-1')
-    start({
-      sandbox: {
-        experimentalStyleIsolation: true, // 使用实验性的样式隔离
-      },
-      excludeAssetFilter: (assetUrl: string) => {
-        // 排除 react-refresh 相关的资源
-        return assetUrl.includes('@react-refresh') || assetUrl.includes('@vite/client')
-      },
-    })
+      registerMicroApps(microApps)
+      setDefaultMountApp('/chapter-1')
+      start({
+        sandbox: { experimentalStyleIsolation: true },
+        singular: true,
+      })
+    }
 
     // 监听路由变化
     const handleRouteChange = () => {
@@ -80,6 +80,19 @@ function App() {
   const handleChapterClick = (chapterId: string) => {
     setActiveChapter(chapterId)
     window.history.pushState(null, '', `/${chapterId}`)
+  }
+
+  // 获取当前章节的端口
+  const getCurrentPort = () => {
+    const portMap: Record<string, number> = {
+      'chapter-1': 3001,
+      'chapter-2': 3002,
+      'chapter-3': 3003,
+      'chapter-4': 3004,
+      'chapter-5': 3005,
+      'chapter-6': 3006,
+    }
+    return portMap[activeChapter] || 3001
   }
 
   return (
@@ -108,11 +121,25 @@ function App() {
         <div className="chapter-info">
           <h2>{chapters.find(c => c.id === activeChapter)?.title}</h2>
           <div className="subapp-container" id="subapp-container">
-            {!isDev && (
+            {isDev ? (
+              // 开发环境：使用iframe加载子应用
+              <iframe
+                key={activeChapter}
+                src={`//localhost:${getCurrentPort()}`}
+                title={activeChapter}
+                style={{
+                  width: '100%',
+                  height: '600px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                }}
+              />
+            ) : !isDev ? (
+              // 生产环境：qiankun加载
               <div className="loading">
                 <p>正在加载子应用...</p>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </main>
