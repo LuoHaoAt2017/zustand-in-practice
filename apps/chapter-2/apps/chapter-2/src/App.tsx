@@ -2,56 +2,110 @@ import React, { useState, useEffect } from 'react'
 import { create } from 'zustand'
 import './App.css'
 
+// ========== Store 类型定义 ==========
+
+// 基础计数器store
+interface CounterStore {
+  count: number
+  increment: () => void
+  decrement: () => void
+  reset: () => void
+}
+
+// 坑1 store
+interface Pitfall1Store {
+  count: number
+  unrelated: number
+  incrementCount: () => void
+  incrementUnrelated: () => void
+}
+
+// 坑2 store
+interface Pitfall2Store {
+  items: number[]
+  addItem: (item: number) => void
+}
+
+// 坑3 store
+interface Pitfall3Store {
+  data: string | null
+  loading: boolean
+  error?: string | null
+  fetchData: (shouldFail?: boolean) => Promise<void>
+}
+
+// 坑4 store
+interface Pitfall4Store {
+  count: number
+  increment: () => void
+  reset: () => void
+}
+
+// 坑5 store
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+interface Pitfall5Store {
+  user: User | null
+  setUser: (user: User | null) => void
+}
+
+// ========== Store 实现 ==========
+
 // 基础计数器store - 正确示例
-const useCounterStore = create((set) => ({
+const useCounterStore = create<CounterStore>((set) => ({
   count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-  decrement: () => set((state) => ({ count: state.count - 1 })),
+  increment: () => set((state: CounterStore) => ({ count: state.count + 1 })),
+  decrement: () => set((state: CounterStore) => ({ count: state.count - 1 })),
   reset: () => set({ count: 0 }),
 }))
 
-// 坑1：直接在组件中解构导致重渲染的store
-const useBadStore1 = create(() => ({
+// 坑1：直接在组件中解构导致重渲染
+const usePitfall1BadStore = create<Pitfall1Store>((set) => ({
   count: 0,
   unrelated: 0,
-  incrementCount: () => useBadStore1.setState((state) => ({ count: state.count + 1 })),
-  incrementUnrelated: () => useBadStore1.setState((state) => ({ unrelated: state.unrelated + 1 })),
+  incrementCount: () => set((state: Pitfall1Store) => ({ count: state.count + 1 })),
+  incrementUnrelated: () => set((state: Pitfall1Store) => ({ unrelated: state.unrelated + 1 })),
 }))
 
-const useGoodStore1 = create(() => ({
+const usePitfall1GoodStore = create<Pitfall1Store>((set) => ({
   count: 0,
   unrelated: 0,
-  incrementCount: () => useGoodStore1.setState((state) => ({ count: state.count + 1 })),
-  incrementUnrelated: () => useGoodStore1.setState((state) => ({ unrelated: state.unrelated + 1 })),
+  incrementCount: () => set((state: Pitfall1Store) => ({ count: state.count + 1 })),
+  incrementUnrelated: () => set((state: Pitfall1Store) => ({ unrelated: state.unrelated + 1 })),
 }))
 
-// 坑2：直接修改原状态的store
-const useBadStore2 = create((set) => ({
+// 坑2：直接修改原状态
+const usePitfall2BadStore = create<Pitfall2Store>((set) => ({
   items: [1, 2, 3],
   addItem: (item: number) => {
-    set((state) => {
-      state.items.push(item) // 错误：直接修改原状态
+    set((state: Pitfall2Store) => {
+      // @ts-ignore - 故意错误：直接修改原状态
+      state.items.push(item)
       return state
     })
   },
 }))
 
-const useGoodStore2 = create((set) => ({
+const usePitfall2GoodStore = create<Pitfall2Store>((set) => ({
   items: [1, 2, 3],
   addItem: (item: number) => {
-    set((state) => ({
+    set((state: Pitfall2Store) => ({
       items: [...state.items, item], // 正确：返回新对象
     }))
   },
 }))
 
 // 坑3：忘记处理异步错误
-const useBadStore3 = create((set) => ({
-  data: null as string | null,
+const usePitfall3BadStore = create<Omit<Pitfall3Store, 'error'>>((set) => ({
+  data: null,
   loading: false,
   fetchData: async (shouldFail = false) => {
     set({ loading: true })
-    await new Promise(resolve => setTimeout(resolve, 500)) // 模拟延迟
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     if (shouldFail) {
       // 错误：没有处理错误
@@ -63,14 +117,14 @@ const useBadStore3 = create((set) => ({
   },
 }))
 
-const useGoodStore3 = create((set) => ({
-  data: null as string | null,
+const usePitfall3GoodStore = create<Pitfall3Store>((set) => ({
+  data: null,
   loading: false,
-  error: null as string | null,
+  error: null,
   fetchData: async (shouldFail = false) => {
     set({ loading: true, error: null })
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)) // 模拟延迟
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       if (shouldFail) {
         throw new Error('模拟API错误')
@@ -85,10 +139,10 @@ const useGoodStore3 = create((set) => ({
 }))
 
 // 坑4：无限更新循环
-const useBadStore4 = create((set, get) => ({
+const usePitfall4BadStore = create<Pitfall4Store>((set, get) => ({
   count: 0,
   increment: () => {
-    set((state) => {
+    set((state: Pitfall4Store) => {
       if (state.count < 3) { // 限制为3次以避免浏览器卡死
         get().increment() // 错误：递归调用
       }
@@ -98,10 +152,10 @@ const useBadStore4 = create((set, get) => ({
   reset: () => set({ count: 0 }),
 }))
 
-const useGoodStore4 = create((set) => ({
+const usePitfall4GoodStore = create<Pitfall4Store>((set) => ({
   count: 0,
   increment: () => {
-    set((state) => {
+    set((state: Pitfall4Store) => {
       if (state.count < 10) {
         return { count: state.count + 1 }
       }
@@ -112,26 +166,17 @@ const useGoodStore4 = create((set) => ({
 }))
 
 // 坑5：类型定义不完整
-const useBadStore5 = create((set) => ({
-  user: null, // 类型被推断为any或null
-  setUser: (user: any) => set({ user }), // user参数类型为any
+const usePitfall5BadStore = create<any>((set: any) => ({
+  user: null,
+  setUser: (user: any) => set({ user }),
 }))
 
-interface User {
-  id: string
-  name: string
-  email: string
-}
-
-interface GoodStore5 {
-  user: User | null
-  setUser: (user: User | null) => void
-}
-
-const useGoodStore5 = create<GoodStore5>((set) => ({
+const usePitfall5GoodStore = create<Pitfall5Store>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
 }))
+
+// ========== 组件定义 ==========
 
 const sections = [
   { id: 'basic', title: '基础用法', description: 'Zustand基本API使用' },
@@ -141,6 +186,35 @@ const sections = [
   { id: 'pitfall4', title: '坑4：无限更新循环', description: '递归调用 vs 条件判断' },
   { id: 'pitfall5', title: '坑5：类型定义不完整', description: '类型不安全 vs 类型安全' },
 ]
+
+// 基础计数器组件
+function CounterDemo() {
+  const { count, increment, decrement, reset } = useCounterStore()
+
+  return (
+    <div className="counter">
+      <h3>Count: {count}</h3>
+      <div className="button-group">
+        <button onClick={increment}>+</button>
+        <button onClick={decrement}>-</button>
+        <button onClick={reset}>重置</button>
+      </div>
+    </div>
+  )
+}
+
+// 使用选择器的计数器显示组件
+function CounterDisplay() {
+  const count = useCounterStore((state) => state.count)
+
+  return (
+    <div className="counter">
+      <h3>Count: {count}</h3>
+      <p>此组件只订阅count状态</p>
+      <p>其他状态变化不会导致重渲染</p>
+    </div>
+  )
+}
 
 function App() {
   const [activeSection, setActiveSection] = useState('basic')
@@ -208,8 +282,11 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall1 = () => {
     const BadComponent = () => {
-      setRenderCountBad(prev => prev + 1)
-      const { count, unrelated, incrementCount, incrementUnrelated } = useBadStore1()
+      useEffect(() => {
+        setRenderCountBad(prev => prev + 1)
+      })
+
+      const { count, unrelated, incrementCount, incrementUnrelated } = usePitfall1BadStore()
 
       return (
         <div className="demo-component">
@@ -226,10 +303,13 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      setRenderCountGood(prev => prev + 1)
-      const count = useGoodStore1((state) => state.count)
-      const incrementCount = useGoodStore1((state) => state.incrementCount)
-      const incrementUnrelated = useGoodStore1((state) => state.incrementUnrelated)
+      useEffect(() => {
+        setRenderCountGood(prev => prev + 1)
+      })
+
+      const count = usePitfall1GoodStore((state: Pitfall1Store) => state.count)
+      const incrementCount = usePitfall1GoodStore((state: Pitfall1Store) => state.incrementCount)
+      const incrementUnrelated = usePitfall1GoodStore((state: Pitfall1Store) => state.incrementUnrelated)
 
       return (
         <div className="demo-component">
@@ -284,7 +364,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall2 = () => {
     const BadComponent = () => {
-      const { items, addItem } = useBadStore2()
+      const { items, addItem } = usePitfall2BadStore()
 
       const handleAdd = () => {
         addItem(items.length + 1)
@@ -301,7 +381,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { items, addItem } = useGoodStore2()
+      const { items, addItem } = usePitfall2GoodStore()
 
       const handleAdd = () => {
         addItem(items.length + 1)
@@ -355,7 +435,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall3 = () => {
     const BadComponent = () => {
-      const { data, loading, fetchData } = useBadStore3()
+      const { data, loading, fetchData } = usePitfall3BadStore()
 
       const handleFetch = async (shouldFail: boolean) => {
         try {
@@ -384,7 +464,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { data, loading, error, fetchData } = useGoodStore3()
+      const { data, loading, error, fetchData } = usePitfall3GoodStore()
 
       const handleFetch = async (shouldFail: boolean) => {
         await fetchData(shouldFail)
@@ -453,7 +533,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall4 = () => {
     const BadComponent = () => {
-      const { count, increment, reset } = useBadStore4()
+      const { count, increment, reset } = usePitfall4BadStore()
 
       const handleIncrement = () => {
         try {
@@ -477,7 +557,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { count, increment, reset } = useGoodStore4()
+      const { count, increment, reset } = usePitfall4GoodStore()
 
       const handleIncrement = () => {
         increment()
@@ -539,17 +619,17 @@ const count = useCounterStore((state) => state.count)`}</pre>
 
   const renderPitfall5 = () => {
     const BadComponent = () => {
-      const { user, setUser } = useBadStore5()
+      const { user, setUser } = usePitfall5BadStore()
 
       const handleSetUser = () => {
         // TypeScript不会报错，但类型不安全
-        setUser({ id: '1', name: 'John' } as any)
+        setUser({ id: '1', name: 'John' })
         addConsoleLog('设置了user，但类型不安全')
       }
 
       const handleSetInvalid = () => {
         // 可以设置任何类型
-        setUser('invalid' as any)
+        setUser('invalid')
         addConsoleLog('设置了无效的user类型')
       }
 
@@ -566,7 +646,7 @@ const count = useCounterStore((state) => state.count)`}</pre>
     }
 
     const GoodComponent = () => {
-      const { user, setUser } = useGoodStore5()
+      const { user, setUser } = usePitfall5GoodStore()
 
       const handleSetUser = () => {
         setUser({ id: '1', name: 'John', email: 'john@example.com' })
@@ -630,35 +710,6 @@ const useStore = create<Store>((set) => ({
 }))`}</pre>
           </div>
         </div>
-      </div>
-    )
-  }
-
-  // 基础计数器组件
-  function CounterDemo() {
-    const { count, increment, decrement, reset } = useCounterStore()
-
-    return (
-      <div className="counter">
-        <h3>Count: {count}</h3>
-        <div className="button-group">
-          <button onClick={increment}>+</button>
-          <button onClick={decrement}>-</button>
-          <button onClick={reset}>重置</button>
-        </div>
-      </div>
-    )
-  }
-
-  // 使用选择器的计数器显示组件
-  function CounterDisplay() {
-    const count = useCounterStore((state) => state.count)
-
-    return (
-      <div className="counter">
-        <h3>Count: {count}</h3>
-        <p>此组件只订阅count状态</p>
-        <p>其他状态变化不会导致重渲染</p>
       </div>
     )
   }
