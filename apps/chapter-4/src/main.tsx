@@ -35,7 +35,7 @@ export async function mount(props: any) {
   render(props)
 }
 
-export async function unmount(props: any) {
+export async function unmount(_props: any) {
   console.log('chapter-4 app unmount')
   if (root) {
     root.unmount()

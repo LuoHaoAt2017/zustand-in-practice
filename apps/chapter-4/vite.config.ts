@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3004,
+    port: 3003,
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -21,5 +21,5 @@ export default defineConfig({
       },
     },
   },
-  base: '/apps/chapter-4/',
+  base: '/apps/chapter-3/',
 })
