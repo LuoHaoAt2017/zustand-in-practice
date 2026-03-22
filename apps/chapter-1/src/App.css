@@ -1,0 +1,230 @@
+/* 第1章子应用样式 */
+
+.chapter-1-app {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.app-header h1 {
+  color: #343a40;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.app-header p {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.comparison-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.comparison-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.comparison-card.highlight {
+  border: 2px solid #4263eb;
+  position: relative;
+}
+
+.comparison-card.highlight::before {
+  content: '推荐';
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #4263eb;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 8px;
+}
+
+.comparison-card h2 {
+  background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+  margin: 0;
+  padding: 1rem;
+  font-size: 1.4rem;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.comparison-card.highlight h2 {
+  background: linear-gradient(90deg, #4263eb 0%, #364fc7 100%);
+  color: white;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.card-content p {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #495057;
+}
+
+.card-content strong {
+  color: #212529;
+  font-weight: 600;
+}
+
+.demo-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #4263eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.demo-button:hover {
+  background: #364fc7;
+  transform: translateY(-1px);
+}
+
+.demo-button:active {
+  transform: translateY(0);
+}
+
+.demo-button.primary {
+  background: #37b24d;
+}
+
+.demo-button.primary:hover {
+  background: #2f9e44;
+}
+
+.demo-button.secondary {
+  background: #f03e3e;
+}
+
+.demo-button.secondary:hover {
+  background: #e03131;
+}
+
+.button-group {
+  margin-bottom: 1rem;
+}
+
+.pros-cons {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.pros-cons h4 {
+  margin: 0 0 0.5rem 0;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.pros-cons ul {
+  margin: 0 0 1rem 1.5rem;
+  padding: 0;
+}
+
+.pros-cons li {
+  margin-bottom: 0.25rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.summary {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 2rem;
+  margin-top: 2rem;
+  border-left: 4px solid #4263eb;
+}
+
+.summary h3 {
+  margin-top: 0;
+  color: #343a40;
+  font-size: 1.5rem;
+}
+
+.summary p {
+  color: #495057;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.recommendation {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.recommendation strong {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: #343a40;
+  font-size: 1.1rem;
+}
+
+.recommendation ul {
+  margin: 0 0 0 1.5rem;
+  padding: 0;
+}
+
+.recommendation li {
+  margin-bottom: 0.5rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .app-header p {
+    font-size: 1rem;
+  }
+
+  .card-content {
+    padding: 1rem;
+  }
+
+  .summary {
+    padding: 1.5rem;
+  }
+}
